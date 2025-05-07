@@ -4,7 +4,7 @@ import subprocess
 import os
 
 # LLM 초기화 (예: Ollama 모델 사용)
-llm = OllamaLLM(base_url='http://localhost:11434', model="qwen2.5-coder:latest")
+llm = OllamaLLM(base_url='http://localhost:11434', model="qwen2.5-coder:3b")
 
 # 현재 스크립트 위치를 기준으로 경로 설정
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -16,7 +16,7 @@ def load_prompt_template(file_name):
     """
     file_path = os.path.join(prompt_dir, file_name)  # prompt 폴더 안의 파일을 참조
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:  # UTF-8 인코딩 명시
             prompt_template = file.read()
         return prompt_template
     except FileNotFoundError:
@@ -32,7 +32,8 @@ def get_git_diff(branch_name):
             ["git", "diff", branch_name, "--unified=0"],
             capture_output=True,
             text=True,
-            check=True
+            check=True,
+            encoding='utf-8'  # UTF-8 인코딩 명시
         )
         return result.stdout
     except subprocess.CalledProcessError:
@@ -59,8 +60,8 @@ def execute_agent(agent_name, prompt_text, diff_text):
 
 def main():
     # 사용자에게 브랜치명 입력받기
-    # branch_name = input("비교할 브랜치명을 입력하세요: ")
-    branch_name = "feat/heart-deduction-auth-check"
+    branch_name = input("비교할 브랜치명을 입력하세요: ")
+    
     diff_text = get_git_diff(branch_name)
     if diff_text is None:
         print("git diff 결과를 가져오지 못했습니다.")
